@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# Plataforma de Planes de Acción - Grupo Heroica
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Grupo Heroica Logo](https://costaricacc.com/cccr/Logoheroica.png)
 
-Currently, two official plugins are available:
+Esta aplicación ha sido diseñada para que el departamento de **Calidad** de Grupo Heroica gestione los planes de acción derivados de los comentarios de clientes, asistentes y expositores en los eventos realizados en los diferentes recintos (CCCR, CCCI, CEVP).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tecnologías Utilizadas
 
-## React Compiler
+- **Frontend**: React + TypeScript + Vite.
+- **Estilos**: Tailwind CSS + Shadcn/ui.
+- **Backend (BAAS)**: Firebase (Authentication, Realtime Database, Functions).
+- **Integraciones**: Skill Eventos API (para la extracción automatizada de eventos).
+- **Iconografía**: Lucide React.
+- **Despliegue**: Firebase Hosting.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📋 Módulos del Sistema
 
-## Expanding the ESLint configuration
+1.  **Login**: Autenticación corporativa y selector de recinto (CCCR, CCCI, CEVP).
+2.  **Dashboard**: Resumen visual de indicadores clave.
+3.  **Eventos**: Conexión con Skill API para consultar eventos del mes, mapear estados (Confirmado/Por Confirmar) e iniciar planes de acción.
+4.  **Planes de Acción**: Gestión del ciclo de vida de los planes (Abierto, En Proceso, Cerrado), registro de no conformidades y evidencias fotográficas.
+5.  **Aprobaciones**: Módulo exclusivo para el equipo de Calidad para revisar, aprobar o rechazar planes propuestos por los departamentos.
+6.  **Resultados**: Reportes estadísticos y gráficos optimizados para presentaciones en sala de juntas.
+7.  **Configuración**: Gestión de usuarios, roles (RBAC), departamentos y tiempos límite de respuesta.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Desarrollo y Configuración
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Requisitos Previos
+- Node.js (v18+)
+- pnpm (Gestor de paquetes recomendado)
+- Firebase CLI (para despliegues)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Instalación
+1. Clonar el repositorio.
+2. Instalar dependencias:
+   ```bash
+   pnpm install
+   ```
+3. Configurar variables de entorno (`.env`):
+   ```env
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   VITE_FIREBASE_DATABASE_URL=...
+   VITE_FIREBASE_PROJECT_ID=...
+   VITE_FIREBASE_STORAGE_BUCKET=...
+   VITE_FIREBASE_MESSAGING_SENDER_ID=...
+   VITE_FIREBASE_APP_ID=...
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   VITE_SKILL_API_URL=https://grupoheroicaapi.skillsuite.net/app/wssuite/api
+   VITE_SKILL_USERNAME=...
+   VITE_SKILL_PASSWORD=...
+   VITE_SKILL_COMPANY_AUTH_ID=...
+   ```
+
+### Scripts Disponibles
+- `pnpm dev`: Inicia el servidor de desarrollo.
+- `pnpm build`: Genera la versión de producción en la carpeta `/dist`.
+- `pnpm preview`: Visualiza localmente la versión de producción.
+
+## 🌐 Despliegue
+
+La plataforma se despliega automáticamente en Firebase Hosting.
+```bash
+pnpm build
+firebase deploy --only hosting
 ```
+URL de producción: [https://gh-planesdeaccion.web.app](https://gh-planesdeaccion.web.app)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔐 Seguridad y Reglas
+- Los accesos están restringidos por un sistema de **Roles (RBAC)** configurable desde el módulo de Configuración.
+- Los datos de cada recinto están aislados en ramas independientes de la Realtime Database.
+- El archivo `.gitignore` protege las credenciales de Skill API y Firebase.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
+© 2026 Grupo Heroica - Departamento de Calidad e Innovación.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
