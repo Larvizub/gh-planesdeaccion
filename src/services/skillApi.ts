@@ -30,8 +30,12 @@ export const getAuthToken = async () => {
     const token = response.data.result?.token || response.data.token;
     if (!token) throw new Error('No se encontró el token en la respuesta');
     return token;
-  } catch (error: any) {
-    console.error('Error en autenticación:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error en autenticación:', error.response?.data || error.message);
+    } else {
+      console.error('Error en autenticación:', error);
+    }
     throw error;
   }
 };
@@ -51,8 +55,12 @@ export const getEvents = async (token: string, idData: number, startDate: string
       }
     });
     return response.data.result?.events || response.data.events || [];
-  } catch (error: any) {
-    console.error('Error al obtener eventos:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error al obtener eventos:', error.response?.data || error.message);
+    } else {
+      console.error('Error al obtener eventos:', error);
+    }
     throw error;
   }
 };
