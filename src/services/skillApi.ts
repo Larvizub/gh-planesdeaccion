@@ -11,31 +11,48 @@ const skillApi = axios.create({
 
 export const getAuthToken = async () => {
   try {
-    const response = await skillApi.post('/login', {
-      username: import.meta.env.VITE_SKILL_USERNAME,
-      password: import.meta.env.VITE_SKILL_PASSWORD,
-      companyAuthId: import.meta.env.VITE_SKILL_COMPANY_AUTH_ID,
-    });
-    return response.data.token;
-  } catch (error) {
-    console.error('Error authenticating with Skill API:', error);
+    const authData = {
+      username: import.meta.env.VITE_SKILL_USERNAME?.trim(),
+      password: import.meta.env.VITE_SKILL_PASSWORD?.trim(),
+      companyAuthId: import.meta.env.VITE_SKILL_COMPANY_AUTH_ID?.trim(),
+      companyId: ""
+    };
+    
+    console.log('Autenticando...');
+    
+    const response = await skillApi.post('/authenticate', authData);
+    console.log('Respuesta Auth:', response.data);
+    
+    if (response.data.success === false) {
+      throw new Error(`Error Skill API (${response.data.errorCode}): ${response.data.errorMessage || 'Credenciales inválidas'}`);
+    }
+    
+    const token = response.data.result?.token || response.data.token;
+    if (!token) throw new Error('No se encontró el token en la respuesta');
+    return token;
+  } catch (error: any) {
+    console.error('Error en autenticación:', error.response?.data || error.message);
     throw error;
   }
 };
 
-export const getEvents = async (token: string, idData: number = 14) => {
+export const getEvents = async (token: string, idData: number, startDate: string, endDate: string) => {
   try {
-    const response = await skillApi.get('/getevents', {
+    const response = await skillApi.post('/events', {
+      Events: {
+        startDate,
+        endDate
+      }
+    }, {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
-      params: {
-        idData,
-      },
+        idData: idData,
+        companyAuthId: import.meta.env.VITE_SKILL_COMPANY_AUTH_ID?.trim(),
+      }
     });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching events from Skill API:', error);
+    return response.data.result?.events || response.data.events || [];
+  } catch (error: any) {
+    console.error('Error al obtener eventos:', error.response?.data || error.message);
     throw error;
   }
 };

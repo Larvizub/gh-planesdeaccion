@@ -10,4 +10,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api-skill': {
+        target: 'https://grupoheroicaapi.skillsuite.net',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-skill/, '/app/wssuite/api'),
+        secure: false, // Por si hay problemas con certificados
+      },
+    },
+  },
 })

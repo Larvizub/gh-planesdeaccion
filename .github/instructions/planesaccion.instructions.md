@@ -32,7 +32,7 @@ URL Webservice: https://grupoheroicaapi.skillsuite.net/app/wssuite/api
 username:  wsSk4Api
 password: 5qT2Uu!qIjG%$XeD
 companyAuthId: xudQREZBrfGdw0ag8tE3NR3XhM6LGa
-CCCR(Costa de Rica) idData = 14
+idData = 14
  
 
 # Instrucciones de como debe ser la Aplicación

@@ -10,19 +10,40 @@ lerna-debug.log*
 .env
 .env.local
 .env.*.local
+.env.test.local
+.env.production.local
 
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# dependencies
 node_modules
+.pnpm-store
+
+# production
 dist
 dist-ssr
+
+# misc
+.DS_Store
 *.local
+Thumbs.db
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.classpath
+.project
+.settings/
+*.launch
+*.factorypath
+.springBeans

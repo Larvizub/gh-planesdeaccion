@@ -19,7 +19,7 @@ export interface AppContextType {
   loading: boolean;
   recinto: string | null;
   setRecinto: (recinto: string) => void;
-  idData: number;
+  idData: number | null;
   db: Database;
 }
 

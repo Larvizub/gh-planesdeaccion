@@ -174,10 +174,10 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   });
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar Desktop */}
-      <aside className="hidden w-64 border-r bg-card md:flex flex-col">
-        <div className="p-6 flex items-center justify-center border-b">
+      <aside className="hidden w-64 border-r bg-card md:flex flex-col shrink-0 overflow-hidden">
+        <div className="p-6 flex items-center justify-center border-b shrink-0">
           <img 
             src="https://costaricacc.com/cccr/Logoheroica.png" 
             alt="Logo Heroica" 

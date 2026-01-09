@@ -8,9 +8,9 @@ import { AppContext } from './AppContext';
 import type { UserData } from './AppContext';
 
 const idDataMap: Record<string, number> = {
-  'CCCR': 14,
-  'CCCI': 15, // Ejemplo
-  'CEVP': 16  // Ejemplo
+  'CCCR': 14, // Costa Rica Convention Center
+  // 'CCCI': 15, // Pendiente confirmar ID para CCCI
+  // 'CEVP': 16, // Pendiente confirmar ID para CEVP
 };
 
 const DEFAULT_PERMISSIONS: Record<string, { [key: string]: boolean }> = {
@@ -105,7 +105,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     recinto,
     db: currentDb,
     setRecinto: handleSetRecinto,
-    idData: recinto ? idDataMap[recinto] || 14 : 14,
+    idData: recinto ? idDataMap[recinto] || null : null,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { ref, onValue, set } from 'firebase/database';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, User, UserCheck, CheckCircle2, Circle } from 'lucide-react';
+import { Shield, User, UserCheck } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -69,7 +69,8 @@ export const Roles = () => {
         title: "Permiso actualizado",
         description: `Se ha cambiado el acceso a ${moduleId} para el rol ${role}.`
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error(error);
       toast({
         title: "Error",
         description: "No se pudo actualizar el permiso.",
