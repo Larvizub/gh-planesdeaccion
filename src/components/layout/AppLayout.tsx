@@ -121,13 +121,12 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar Desktop */}
       <aside className="hidden w-64 border-r bg-card md:flex flex-col">
-        <div className="p-4 flex items-center gap-2">
+        <div className="p-6 flex items-center justify-center border-b">
           <img 
             src="https://costaricacc.com/cccr/Logoheroica.png" 
             alt="Logo Heroica" 
-            className="h-10 w-auto"
+            className="h-16 w-auto"
           />
-          <span className="font-bold text-lg hidden lg:block">Planes Accion</span>
         </div>
         
         <div className="px-4 py-2">
@@ -200,7 +199,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="fixed inset-0 z-50 bg-background md:hidden">
              <div className="flex flex-col h-full">
                 <div className="p-4 flex items-center justify-between border-b">
-                  <img src="https://costaricacc.com/cccr/Logoheroica.png" alt="Logo" className="h-8" />
+                  <img src="https://costaricacc.com/cccr/Logoheroica.png" alt="Logo" className="h-12 w-auto" />
                   <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}><X /></Button>
                 </div>
                 <nav className="flex-1 p-4 space-y-1">
