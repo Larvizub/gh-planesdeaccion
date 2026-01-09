@@ -3,6 +3,7 @@ import { useAppContext } from '@/context/AppContext';
 import { ref, onValue, update, DataSnapshot } from 'firebase/database';
 import { storage } from '@/lib/firebase';
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { isAfter } from 'date-fns';
 import { 
   Table, 
   TableBody, 
@@ -27,7 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, FileUp, X } from 'lucide-react';
+import { Camera, FileUp, X, Lock, AlertCircle } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
 
 interface PlanAccion {
@@ -52,6 +53,8 @@ export const PlanesAccion = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<PlanAccion | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fechaLimite, setFechaLimite] = useState<string | null>(null);
+  const [desbloqueados, setDesbloqueados] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   // Update state
@@ -68,6 +71,16 @@ export const PlanesAccion = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Escuchar tiempos y desbloqueados
+    const configRef = ref(db, `config/${recinto}/tiempos`);
+    onValue(configRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        setFechaLimite(data.fechaLimite);
+        setDesbloqueados(data.desbloqueados || {});
+      }
+    });
+
     const planesRef = ref(db, `planes-accion/${recinto}`);
     const unsubscribe = onValue(planesRef, (snapshot: DataSnapshot) => {
       const data = snapshot.val();
@@ -202,10 +215,27 @@ export const PlanesAccion = () => {
 
   const isReadOnly = (plan: PlanAccion) => {
     if (!userData) return true;
+    
+    // Si ya está en estos estados, es solo lectura para el usuario normal
+    const statusReadOnly = ['Cerrado', 'Revision', 'Aprobado'].includes(plan.status);
+    
     if (userData.role === 'Usuario') {
-      return ['Cerrado', 'Revision', 'Aprobado'].includes(plan.status);
+      // Verificar si el tiempo expiró y si el departamento NO está desbloqueado
+      const timeExpired = fechaLimite ? isAfter(new Date(), new Date(fechaLimite)) : false;
+      const isUnlocked = desbloqueados[plan.departamentoId] === true;
+
+      // Es lectura si el tiempo expiró (y no está desbloqueado) O si el status ya no permite edición
+      return (timeExpired && !isUnlocked) || statusReadOnly;
     }
+    
     return false;
+  };
+
+  const isTimeLocked = (plan: PlanAccion) => {
+    if (!userData || userData.role !== 'Usuario') return false;
+    const timeExpired = fechaLimite ? isAfter(new Date(), new Date(fechaLimite)) : false;
+    const isUnlocked = desbloqueados[plan.departamentoId] === true;
+    return timeExpired && !isUnlocked;
   };
 
   return (
@@ -266,6 +296,17 @@ export const PlanesAccion = () => {
               Evento: {selectedPlan?.eventoName} | Comentario: {selectedPlan?.comentario}
             </DialogDescription>
           </DialogHeader>
+
+          {selectedPlan && isTimeLocked(selectedPlan) && (
+            <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-500/50 p-4 rounded-lg flex gap-3 items-center">
+              <Lock className="h-6 w-6 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-200">TIEMPO AGOTADO</p>
+                <p className="text-xs text-amber-700 dark:text-amber-300">El periodo de registro ha finalizado. Contacte a Calidad para solicitar un desbloqueo.</p>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
             {selectedPlan?.status === 'Rechazado' && (
               <div className="md:col-span-2 bg-destructive/10 p-3 rounded-md border border-destructive/20">

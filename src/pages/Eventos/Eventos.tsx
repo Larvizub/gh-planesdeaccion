@@ -24,8 +24,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ref, push, set, onValue, DataSnapshot } from 'firebase/database';
-import { format } from 'date-fns';
+import { format, isAfter } from 'date-fns';
 import { Loading } from '@/components/ui/loading';
+import { AlertCircle } from 'lucide-react';
 
 import { startOfMonth, endOfMonth, setYear, setMonth, getYear, getMonth } from 'date-fns';
 
@@ -73,6 +74,8 @@ export const Eventos = () => {
   const [selectedStatus, setSelectedStatus] = useState('CON-POR'); // Especial para ambos
   const [selectedEvento, setSelectedEvento] = useState<Evento | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isExpiredDialogOpen, setIsExpiredDialogOpen] = useState(false);
+  const [fechaLimite, setFechaLimite] = useState<string | null>(null);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const { toast } = useToast();
 
@@ -132,6 +135,12 @@ export const Eventos = () => {
   }, [idData, selectedMonth, selectedYear, toast]);
 
   useEffect(() => {
+    // Escuchar fecha limite
+    const limitRef = ref(db, `config/${recinto}/tiempos/fechaLimite`);
+    onValue(limitRef, (snapshot) => {
+      setFechaLimite(snapshot.val());
+    });
+
     const deptRef = ref(db, `config/${recinto}/departamentos`);
     const unsubscribe = onValue(deptRef, (snapshot: DataSnapshot) => {
       const data = snapshot.val();
@@ -310,8 +319,12 @@ export const Eventos = () => {
                         variant="outline" 
                         size="sm"
                         onClick={() => {
-                          setSelectedEvento(evento);
-                          setIsDialogOpen(true);
+                          if (fechaLimite && isAfter(new Date(), new Date(fechaLimite))) {
+                            setIsExpiredDialogOpen(true);
+                          } else {
+                            setSelectedEvento(evento);
+                            setIsDialogOpen(true);
+                          }
                         }}
                       >
                         Generar Plan
@@ -361,6 +374,28 @@ export const Eventos = () => {
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
             <Button onClick={handleCreatePlan} disabled={creatingPlan}>
               {creatingPlan ? "Creando..." : "Crear Plan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Tiempo Expirado */}
+      <Dialog open={isExpiredDialogOpen} onOpenChange={setIsExpiredDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-6 w-6" /> Tiempo Agotado
+            </DialogTitle>
+            <DialogDescription className="text-base pt-4">
+              El tiempo para el registro de información y generación de planes de acción ha terminado para este periodo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-muted p-4 rounded-lg border my-4">
+            <p className="text-sm font-medium">Por favor, comuníquese con el departamento de Calidad si necesita realizar un registro.</p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsExpiredDialogOpen(false)} className="w-full">
+              Entendido
             </Button>
           </DialogFooter>
         </DialogContent>
