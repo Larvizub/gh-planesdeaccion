@@ -68,7 +68,7 @@ export const Login = () => {
               className="h-24 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl">Planes de Acción</CardTitle>
+          <CardTitle className="text-3xl font-bold">Planes de Accción de Calidad</CardTitle>
           <CardDescription>
             Ingrese con su cuenta corporativa para gestionar los planes de acción.
           </CardDescription>

@@ -32,8 +32,9 @@ interface PlanAccion {
   id: string;
   eventoName: string;
   comentario: string;
+  departamentoId: string;
   departamentoName: string;
-  status: 'Abierto' | 'En Proceso' | 'Cerrado' | 'Revision';
+  status: 'Abierto' | 'En Proceso' | 'Cerrado' | 'Revision' | 'Aprobado' | 'Rechazado';
   consecutivoNC?: string;
   planAccionDetalle: string;
   comentarioCierre?: string;
@@ -79,7 +80,7 @@ export const PlanesAccion = () => {
     });
 
     return () => unsubscribe();
-  }, [recinto, userData]);
+  }, [recinto, userData, db]);
 
   const handleOpenDialog = (plan: PlanAccion) => {
     setSelectedPlan(plan);

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { auth, getDbForRecinto } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { ref, get, set, update, onValue } from 'firebase/database';
+import { ref, get, set, onValue } from 'firebase/database';
 import type { User } from 'firebase/auth';
 import type { ReactNode } from 'react';
-import { AppContext, UserData } from './AppContext';
+import { AppContext } from './AppContext';
+import type { UserData } from './AppContext';
 
 const idDataMap: Record<string, number> = {
   'CCCR': 14,
