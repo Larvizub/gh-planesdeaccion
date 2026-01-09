@@ -28,7 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, FileUp, X, Lock, AlertCircle } from 'lucide-react';
+import { Camera, FileUp, X, Lock} from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
 
 interface PlanAccion {
