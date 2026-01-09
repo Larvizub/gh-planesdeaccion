@@ -65,7 +65,7 @@ export const Login = () => {
             <img 
               src="https://costaricacc.com/cccr/Logoheroica.png" 
               alt="Logo Heroica" 
-              className="h-24 w-auto"
+              className="h-20 w-auto object-contain dark:brightness-0 dark:invert"
             />
           </div>
           <CardTitle className="text-3xl font-bold">Planes de Accción de Calidad</CardTitle>

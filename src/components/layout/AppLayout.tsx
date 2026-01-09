@@ -181,7 +181,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
           <img 
             src="https://costaricacc.com/cccr/Logoheroica.png" 
             alt="Logo Heroica" 
-            className="h-16 w-auto"
+            className="h-14 w-auto object-contain dark:brightness-0 dark:invert"
           />
         </div>
         
@@ -263,7 +263,11 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="fixed inset-0 z-50 bg-background md:hidden">
              <div className="flex flex-col h-full">
                 <div className="p-4 flex items-center justify-between border-b">
-                  <img src="https://costaricacc.com/cccr/Logoheroica.png" alt="Logo" className="h-12 w-auto" />
+                  <img 
+                    src="https://costaricacc.com/cccr/Logoheroica.png" 
+                    alt="Logo" 
+                    className="h-10 w-auto object-contain dark:brightness-0 dark:invert" 
+                  />
                   <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}><X /></Button>
                 </div>
                 <nav className="flex-1 p-4 space-y-1">
