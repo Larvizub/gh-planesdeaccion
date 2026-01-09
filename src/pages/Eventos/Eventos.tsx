@@ -170,7 +170,8 @@ export const Eventos = () => {
         departamentoId: idDepartamento,
         departamentoName: dept?.name,
         status: 'Abierto',
-        createdAt: new Date().toISOString(),
+        createdAt: selectedEvento.endDate, // Usamos la fecha de fin del evento
+        realCreatedAt: new Date().toISOString(), // Mantenemos la fecha real de creación como auditoría
         recinto,
       });
 

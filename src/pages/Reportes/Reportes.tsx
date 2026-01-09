@@ -134,7 +134,7 @@ export const Reportes = () => {
       "Evento": p.eventoName,
       "Departamento": p.departamentoName,
       "Estado": p.status,
-      "Fecha Creacion": new Date(p.createdAt).toLocaleDateString(),
+      "Fecha Evento": new Date(p.createdAt).toLocaleDateString(),
       "No. Conformidad": p.consecutivoNC || 'N/A',
       "Comentario del Cliente": p.comentario,
       "Causas": p.causas || '',
