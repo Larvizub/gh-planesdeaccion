@@ -27,7 +27,6 @@ import { LoadingRow } from '@/components/ui/loading';
 interface Departamento {
   id: string;
   name: string;
-  managerEmail: string;
 }
 
 export const Departamentos = () => {
@@ -36,7 +35,6 @@ export const Departamentos = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [name, setName] = useState('');
-  const [managerEmail, setManagerEmail] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -55,15 +53,15 @@ export const Departamentos = () => {
   }, [recinto]);
 
   const handleSubmit = async () => {
-    if (!name || !managerEmail) return;
+    if (!name) return;
 
     try {
       if (editingId) {
-        await update(ref(db, `config/${recinto}/departamentos/${editingId}`), { name, managerEmail });
+        await update(ref(db, `config/${recinto}/departamentos/${editingId}`), { name });
         toast({ title: "Actualizado", description: "Departamento actualizado." });
       } else {
         const newRef = push(ref(db, `config/${recinto}/departamentos`));
-        await set(newRef, { name, managerEmail });
+        await set(newRef, { name });
         toast({ title: "Creado", description: "Departamento creado." });
       }
       resetForm();
@@ -75,7 +73,6 @@ export const Departamentos = () => {
 
   const resetForm = () => {
     setName('');
-    setManagerEmail('');
     setEditingId(null);
     setIsDialogOpen(false);
   };
@@ -83,7 +80,6 @@ export const Departamentos = () => {
   const handleEdit = (dept: Departamento) => {
     setEditingId(dept.id);
     setName(dept.name);
-    setManagerEmail(dept.managerEmail);
     setIsDialogOpen(true);
   };
 
@@ -116,20 +112,18 @@ export const Departamentos = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre del Departamento</TableHead>
-                <TableHead>Email Responsable</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <LoadingRow colSpan={3} />
+                <LoadingRow colSpan={2} />
               ) : departamentos.length === 0 ? (
-                <TableRow><TableCell colSpan={3} className="text-center">No hay departamentos configurados.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={2} className="text-center">No hay departamentos configurados.</TableCell></TableRow>
               ) : (
                 departamentos.map((dept) => (
                   <TableRow key={dept.id}>
                     <TableCell className="font-medium">{dept.name}</TableCell>
-                    <TableCell>{dept.managerEmail}</TableCell>
                     <TableCell className="text-right flex justify-end gap-2">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(dept)}><Edit2 className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(dept.id)}><Trash2 className="h-4 w-4" /></Button>
@@ -151,10 +145,6 @@ export const Departamentos = () => {
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del Departamento</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Operaciones" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email del Responsable</Label>
-              <Input id="email" type="email" value={managerEmail} onChange={(e) => setManagerEmail(e.target.value)} placeholder="email@ejemplo.com" />
             </div>
           </div>
           <DialogFooter>

@@ -33,7 +33,6 @@ interface PlanAccion {
   eventoName: string;
   comentario: string;
   departamentoName: string;
-  responsableEmail: string;
   status: 'Abierto' | 'En Proceso' | 'Cerrado' | 'Revision';
   consecutivoNC?: string;
   planAccionDetalle: string;
@@ -43,7 +42,7 @@ interface PlanAccion {
 }
 
 export const PlanesAccion = () => {
-  const { recinto, db } = useAppContext();
+  const { recinto, db, userData } = useAppContext();
   const [planes, setPlanes] = useState<PlanAccion[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<PlanAccion | null>(null);
@@ -62,13 +61,16 @@ export const PlanesAccion = () => {
     const unsubscribe = onValue(planesRef, (snapshot: DataSnapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list = Object.entries(data).map(([id, val]) => ({
+        let list = Object.entries(data).map(([id, val]) => ({
           id,
           ...(val as object)
         })) as PlanAccion[];
         
-        // Filter by user role/email if necessary (Normal users only see theirs)
-        // For now, listing all for development
+        // Filter by user role/dept
+        if (userData && userData.role === 'Usuario') {
+          list = list.filter(p => p.departamentoId === userData.departmentId);
+        }
+        
         setPlanes(list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       } else {
         setPlanes([]);
@@ -77,7 +79,7 @@ export const PlanesAccion = () => {
     });
 
     return () => unsubscribe();
-  }, [recinto]);
+  }, [recinto, userData]);
 
   const handleOpenDialog = (plan: PlanAccion) => {
     setSelectedPlan(plan);

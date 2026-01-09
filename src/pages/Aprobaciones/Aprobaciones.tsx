@@ -30,7 +30,6 @@ interface PlanAccion {
   eventoName: string;
   comentario: string;
   departamentoName: string;
-  responsableEmail: string;
   status: string;
   planAccionDetalle: string;
   comentarioCierre?: string;

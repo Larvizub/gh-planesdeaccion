@@ -39,7 +39,6 @@ interface Evento {
 interface Departamento {
   id: string;
   name: string;
-  managerEmail: string;
 }
 
 export const Eventos = () => {
@@ -114,7 +113,6 @@ export const Eventos = () => {
         comentario,
         departamentoId: idDepartamento,
         departamentoName: dept?.name,
-        responsableEmail: dept?.managerEmail,
         status: 'Abierto',
         createdAt: new Date().toISOString(),
         recinto,

@@ -9,14 +9,15 @@ import { Aprobaciones } from './pages/Aprobaciones/Aprobaciones';
 import { Resultados } from './pages/Resultados/Resultados';
 import { Departamentos } from './pages/Configuracion/Departamentos';
 import { Usuarios } from './pages/Configuracion/Usuarios';
+import { Roles } from './pages/Configuracion/Roles';
 import { Tiempos } from './pages/Configuracion/Tiempos';
 import { Perfil } from './pages/Configuracion/Perfil';
 import { AppLayout } from './components/layout/AppLayout';
 import { Toaster } from './components/ui/toaster';
 import { Loading } from './components/ui/loading';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, recinto } = useAppContext();
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
+  const { user, userData, loading, recinto } = useAppContext();
 
   if (loading) return (
     <div className="flex h-screen w-screen items-center justify-center">
@@ -24,6 +25,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
   if (!user || !recinto) return <Navigate to="/login" />;
+  
+  // Si hay roles permitidos y el usuario no tiene uno de ellos
+  if (allowedRoles && userData && !allowedRoles.includes(userData.role)) {
+    return <Navigate to="/" />;
+  }
 
   return <>{children}</>;
 };
@@ -58,7 +64,7 @@ function AppRoutes() {
       } />
 
       <Route path="/aprobaciones" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={['Calidad', 'Administrador']}>
           <AppLayout>
             <Aprobaciones />
           </AppLayout>
@@ -74,7 +80,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/usuarios" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={['Administrador']}>
           <AppLayout>
             <Usuarios />
           </AppLayout>
@@ -82,9 +88,17 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/departamentos" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
           <AppLayout>
             <Departamentos />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/configuracion/roles" element={
+        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
+          <AppLayout>
+            <Roles />
           </AppLayout>
         </ProtectedRoute>
       } />
@@ -98,7 +112,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/tiempos" element={
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
           <AppLayout>
             <Tiempos />
           </AppLayout>

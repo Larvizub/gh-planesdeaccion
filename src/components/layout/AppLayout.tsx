@@ -10,6 +10,7 @@ import {
   Settings, 
   FileText, 
   Users, 
+  ShieldCheck,
   Building2, 
   UserCircle, 
   Clock, 
@@ -25,6 +26,17 @@ import { Separator } from '@/components/ui/separator';
 import { useAppContext } from '@/context/AppContext';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ref, onValue, update } from 'firebase/database';
+import { Label } from '@/components/ui/label';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -80,9 +92,36 @@ const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children }:
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const { user, recinto } = useAppContext();
+  const { user, userData, recinto, db } = useAppContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+  const [showDeptModal, setShowDeptModal] = useState(false);
+  const [selectedDept, setSelectedDept] = useState('');
+  const [depts, setDepts] = useState<{id: string, name: string}[]>([]);
+
+  React.useEffect(() => {
+    if (userData && !userData.departmentId) {
+      const deptRef = ref(db, `config/${recinto}/departamentos`);
+      onValue(deptRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, name: val.name }));
+          setDepts(list);
+          setShowDeptModal(true);
+        }
+      });
+    }
+  }, [userData, db, recinto]);
+
+  const handleSaveDept = async () => {
+    if (!selectedDept || !user) return;
+    const dept = depts.find(d => d.id === selectedDept);
+    await update(ref(db, `users/${recinto}/${user.uid}`), {
+      departmentId: selectedDept,
+      departmentName: dept?.name
+    });
+    setShowDeptModal(false);
+  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -102,20 +141,37 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
     { label: 'Dashboard', href: '/', icon: LayoutDashboard },
     { label: 'Eventos', href: '/eventos', icon: Calendar },
     { label: 'Planes de Acción', href: '/planes-accion', icon: FileText },
-    { label: 'Aprobaciones', href: '/aprobaciones', icon: CheckCircle2 },
+    { label: 'Aprobaciones', href: '/aprobaciones', icon: CheckCircle2, roles: ['Calidad', 'Administrador'] },
     { label: 'Resultados', href: '/resultados', icon: BarChart3 },
     { 
       label: 'Configuración', 
       href: '/configuracion', 
       icon: Settings,
+      roles: ['Administrador', 'Calidad'],
       subItems: [
-        { label: 'Usuarios', href: '/configuracion/usuarios', icon: Users },
+        { label: 'Usuarios', href: '/configuracion/usuarios', icon: Users, roles: ['Administrador'] },
         { label: 'Departamentos', href: '/configuracion/departamentos', icon: Building2 },
-        { label: 'Perfil', href: '/configuracion/perfil', icon: UserCircle },
+        { label: 'Roles', href: '/configuracion/roles', icon: ShieldCheck },
         { label: 'Tiempos Límites', href: '/configuracion/tiempos', icon: Clock },
       ]
     },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.roles && userData && !item.roles.includes(userData.role)) return false;
+    return true;
+  }).map(item => {
+    if (item.subItems) {
+      return {
+        ...item,
+        subItems: item.subItems.filter(sub => {
+          if (sub.roles && userData && !sub.roles.includes(userData.role)) return false;
+          return true;
+        })
+      };
+    }
+    return item;
+  });
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -136,13 +192,13 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <SidebarItem
               key={item.href}
               icon={item.icon}
               label={item.label}
               href={item.href}
-              isActive={location.pathname === item.href}
+              isActive={location.pathname === item.href || (item.subItems && location.pathname.startsWith(item.href))}
             >
               {item.subItems?.map((sub) => (
                 <SidebarItem
@@ -161,6 +217,12 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <Separator />
         
         <div className="p-4 space-y-2">
+          <Button asChild variant="ghost" size="sm" className={cn("w-full justify-start gap-3", location.pathname === '/configuracion/perfil' && "bg-accent text-accent-foreground")}>
+            <Link to="/configuracion/perfil" className="flex items-center gap-3">
+              <UserCircle className="h-4 w-4" />
+              <span>Mi Perfil</span>
+            </Link>
+          </Button>
           <Button variant="ghost" size="sm" className="w-full justify-start gap-3" onClick={toggleDarkMode}>
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             <span>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
@@ -184,13 +246,15 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium leading-none">{user?.displayName || user?.email}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              {user?.email?.charAt(0).toUpperCase()}
-            </div>
+            <Link to="/configuracion/perfil" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium leading-none">{userData?.displayName || user?.email}</p>
+                <p className="text-xs text-muted-foreground">{userData?.role} - {userData?.departmentName || 'Sin depto'}</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                {user?.email?.charAt(0).toUpperCase()}
+              </div>
+            </Link>
           </div>
         </header>
 
@@ -203,7 +267,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
                   <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}><X /></Button>
                 </div>
                 <nav className="flex-1 p-4 space-y-1">
-                  {menuItems.map((item) => (
+                  {filteredMenuItems.map((item) => (
                     <SidebarItem
                       key={item.href}
                       icon={item.icon}
@@ -223,9 +287,16 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
                       ))}
                     </SidebarItem>
                   ))}
+                  <Separator className="my-2" />
+                  <SidebarItem
+                    icon={UserCircle}
+                    label="Mi Perfil"
+                    href="/configuracion/perfil"
+                    isActive={location.pathname === '/configuracion/perfil'}
+                  />
                 </nav>
                 <div className="p-4">
-                  <Button variant="outline" className="w-full" onClick={handleLogout}>Cerrar Sesión</Button>
+                  <Button variant="outline" className="w-full text-destructive" onClick={handleLogout}>Cerrar Sesión</Button>
                 </div>
              </div>
           </div>
@@ -235,6 +306,37 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
           {children}
         </main>
       </div>
+
+      <Dialog open={showDeptModal} onOpenChange={setShowDeptModal}>
+        <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>Bienvenido a la plataforma</DialogTitle>
+            <DialogDescription>
+              Para continuar, por favor selecciona el departamento al que perteneces.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="dept">Departamento</Label>
+              <Select onValueChange={setSelectedDept} value={selectedDept}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un departamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {depts.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button disabled={!selectedDept} onClick={handleSaveDept} className="w-full">
+              Confirmar Departamento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
