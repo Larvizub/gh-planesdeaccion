@@ -36,6 +36,7 @@ interface PlanAccion {
   departamentoName: string;
   status: 'Abierto' | 'En Proceso' | 'Cerrado' | 'Revision' | 'Aprobado' | 'Rechazado';
   consecutivoNC?: string;
+  causas?: string;
   planAccionDetalle: string;
   comentarioCierre?: string;
   fotosCierre?: string[];
@@ -52,6 +53,7 @@ export const PlanesAccion = () => {
 
   // Update state
   const [status, setStatus] = useState<string>('');
+  const [causas, setCausas] = useState('');
   const [planDetalle, setPlanDetalle] = useState('');
   const [consecutivoNC, setConsecutivoNC] = useState('');
   const [comentarioCierre, setComentarioCierre] = useState('');
@@ -85,6 +87,7 @@ export const PlanesAccion = () => {
   const handleOpenDialog = (plan: PlanAccion) => {
     setSelectedPlan(plan);
     setStatus(plan.status);
+    setCausas(plan.causas || '');
     setPlanDetalle(plan.planAccionDetalle || '');
     setConsecutivoNC(plan.consecutivoNC || '');
     setComentarioCierre(plan.comentarioCierre || '');
@@ -99,6 +102,7 @@ export const PlanesAccion = () => {
       const planRef = ref(db, `planes-accion/${recinto}/${selectedPlan.id}`);
       const updates: Record<string, string | string[] | undefined> = {
         status,
+        causas,
         planAccionDetalle: planDetalle,
         consecutivoNC,
         updatedAt: new Date().toISOString(),
@@ -213,9 +217,19 @@ export const PlanesAccion = () => {
               <Label htmlFor="nc">Consecutivo No Conformidad (Opcional)</Label>
               <Input 
                 id="nc" 
-                placeholder="Ej: NC-2026-001" 
+                placeholder="Ej: H-CR-2026-0001" 
                 value={consecutivoNC}
                 onChange={(e) => setConsecutivoNC(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="causas">Causas</Label>
+              <Textarea 
+                id="causas" 
+                placeholder="Describa las causas que originaron el comentario..." 
+                className="min-h-[80px]"
+                value={causas}
+                onChange={(e) => setCausas(e.target.value)}
               />
             </div>
             <div className="md:col-span-2 space-y-2">

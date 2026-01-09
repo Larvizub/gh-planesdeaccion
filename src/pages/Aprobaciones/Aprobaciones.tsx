@@ -31,6 +31,7 @@ interface PlanAccion {
   comentario: string;
   departamentoName: string;
   status: string;
+  causas?: string;
   planAccionDetalle: string;
   comentarioCierre?: string;
   rejectReason?: string;
@@ -172,6 +173,10 @@ export const Aprobaciones = () => {
                 <div className="col-span-2">
                    <Label className="text-muted-foreground">Comentario Inicial</Label>
                    <p className="bg-muted p-2 rounded-md">{selectedPlan?.comentario}</p>
+                </div>
+                <div className="col-span-2">
+                   <Label className="text-muted-foreground">Causas</Label>
+                   <p className="bg-muted p-2 rounded-md">{selectedPlan?.causas || 'No especificado'}</p>
                 </div>
                 <div className="col-span-2">
                    <Label className="text-muted-foreground">Detalle del Plan</Label>
