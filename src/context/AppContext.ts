@@ -1,0 +1,22 @@
+import { createContext, useContext } from 'react';
+import type { User } from 'firebase/auth';
+import type { Database } from 'firebase/database';
+
+export interface AppContextType {
+  user: User | null;
+  loading: boolean;
+  recinto: string | null;
+  setRecinto: (recinto: string) => void;
+  idData: number;
+  db: Database;
+}
+
+export const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (context === undefined) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
+  return context;
+};
