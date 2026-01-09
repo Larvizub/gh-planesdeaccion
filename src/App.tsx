@@ -16,8 +16,8 @@ import { AppLayout } from './components/layout/AppLayout';
 import { Toaster } from './components/ui/toaster';
 import { Loading } from './components/ui/loading';
 
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
-  const { user, userData, loading, recinto } = useAppContext();
+const ProtectedRoute = ({ children, moduleId }: { children: React.ReactNode, moduleId?: string }) => {
+  const { user, permissions, loading, recinto } = useAppContext();
 
   if (loading) return (
     <div className="flex h-screen w-screen items-center justify-center">
@@ -26,8 +26,9 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
   );
   if (!user || !recinto) return <Navigate to="/login" />;
   
-  // Si hay roles permitidos y el usuario no tiene uno de ellos
-  if (allowedRoles && userData && !allowedRoles.includes(userData.role)) {
+  // Si hay un moduleId y el usuario tiene permisos cargados
+  // Solo redirigir si el permiso es explícitamente falso
+  if (moduleId && permissions && permissions[moduleId] === false) {
     return <Navigate to="/" />;
   }
 
@@ -40,7 +41,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       
       <Route path="/" element={
-        <ProtectedRoute>
+        <ProtectedRoute moduleId="dashboard">
           <AppLayout>
             <Dashboard />
           </AppLayout>
@@ -48,7 +49,7 @@ function AppRoutes() {
       } />
 
       <Route path="/eventos" element={
-        <ProtectedRoute>
+        <ProtectedRoute moduleId="eventos">
           <AppLayout>
             <Eventos />
           </AppLayout>
@@ -56,7 +57,7 @@ function AppRoutes() {
       } />
 
       <Route path="/planes-accion" element={
-        <ProtectedRoute>
+        <ProtectedRoute moduleId="planes">
           <AppLayout>
             <PlanesAccion />
           </AppLayout>
@@ -64,7 +65,7 @@ function AppRoutes() {
       } />
 
       <Route path="/aprobaciones" element={
-        <ProtectedRoute allowedRoles={['Calidad', 'Administrador']}>
+        <ProtectedRoute moduleId="aprobaciones">
           <AppLayout>
             <Aprobaciones />
           </AppLayout>
@@ -72,7 +73,7 @@ function AppRoutes() {
       } />
 
       <Route path="/resultados" element={
-        <ProtectedRoute>
+        <ProtectedRoute moduleId="resultados">
           <AppLayout>
             <Resultados />
           </AppLayout>
@@ -80,7 +81,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/usuarios" element={
-        <ProtectedRoute allowedRoles={['Administrador']}>
+        <ProtectedRoute moduleId="usuarios">
           <AppLayout>
             <Usuarios />
           </AppLayout>
@@ -88,7 +89,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/departamentos" element={
-        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
+        <ProtectedRoute moduleId="departamentos">
           <AppLayout>
             <Departamentos />
           </AppLayout>
@@ -96,7 +97,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/roles" element={
-        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
+        <ProtectedRoute moduleId="roles">
           <AppLayout>
             <Roles />
           </AppLayout>
@@ -112,7 +113,7 @@ function AppRoutes() {
       } />
 
       <Route path="/configuracion/tiempos" element={
-        <ProtectedRoute allowedRoles={['Administrador', 'Calidad']}>
+        <ProtectedRoute moduleId="tiempos">
           <AppLayout>
             <Tiempos />
           </AppLayout>

@@ -92,7 +92,7 @@ const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children }:
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const { user, userData, recinto, db } = useAppContext();
+  const { user, userData, permissions, recinto, db } = useAppContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -138,36 +138,36 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   const menuItems = [
-    { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { label: 'Eventos', href: '/eventos', icon: Calendar },
-    { label: 'Planes de Acción', href: '/planes-accion', icon: FileText },
-    { label: 'Aprobaciones', href: '/aprobaciones', icon: CheckCircle2, roles: ['Calidad', 'Administrador'] },
-    { label: 'Resultados', href: '/resultados', icon: BarChart3 },
+    { id: 'dashboard', label: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { id: 'eventos', label: 'Eventos', href: '/eventos', icon: Calendar },
+    { id: 'planes', label: 'Planes de Acción', href: '/planes-accion', icon: FileText },
+    { id: 'aprobaciones', label: 'Aprobaciones', href: '/aprobaciones', icon: CheckCircle2 },
+    { id: 'resultados', label: 'Resultados', href: '/resultados', icon: BarChart3 },
     { 
+      id: 'configuracion',
       label: 'Configuración', 
       href: '/configuracion', 
       icon: Settings,
-      roles: ['Administrador', 'Calidad'],
       subItems: [
-        { label: 'Usuarios', href: '/configuracion/usuarios', icon: Users, roles: ['Administrador'] },
-        { label: 'Departamentos', href: '/configuracion/departamentos', icon: Building2 },
-        { label: 'Roles', href: '/configuracion/roles', icon: ShieldCheck },
-        { label: 'Tiempos Límites', href: '/configuracion/tiempos', icon: Clock },
+        { id: 'usuarios', label: 'Usuarios', href: '/configuracion/usuarios', icon: Users },
+        { id: 'departamentos', label: 'Departamentos', href: '/configuracion/departamentos', icon: Building2 },
+        { id: 'roles', label: 'Roles', href: '/configuracion/roles', icon: ShieldCheck },
+        { id: 'tiempos', label: 'Tiempos Límites', href: '/configuracion/tiempos', icon: Clock },
       ]
     },
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
-    if (item.roles && userData && !item.roles.includes(userData.role)) return false;
-    return true;
+    if (item.id === 'configuracion') {
+      const hasSubItems = item.subItems?.some(sub => permissions?.[sub.id]);
+      return hasSubItems;
+    }
+    return permissions?.[item.id];
   }).map(item => {
     if (item.subItems) {
       return {
         ...item,
-        subItems: item.subItems.filter(sub => {
-          if (sub.roles && userData && !sub.roles.includes(userData.role)) return false;
-          return true;
-        })
+        subItems: item.subItems.filter(sub => permissions?.[sub.id])
       };
     }
     return item;

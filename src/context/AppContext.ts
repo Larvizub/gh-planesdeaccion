@@ -15,6 +15,7 @@ export interface UserData {
 export interface AppContextType {
   user: User | null;
   userData: UserData | null;
+  permissions: { [key: string]: boolean } | null;
   loading: boolean;
   recinto: string | null;
   setRecinto: (recinto: string) => void;

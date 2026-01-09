@@ -83,7 +83,7 @@ export const Login = () => {
               <SelectContent>
                 <SelectItem value="CCCR">CCCR (Costa Rica)</SelectItem>
                 <SelectItem value="CCCI">CCCI (Cartagena)</SelectItem>
-                <SelectItem value="CEVP">CEVP (Panamá)</SelectItem>
+                <SelectItem value="CEVP">CEVP (Cali)</SelectItem>
               </SelectContent>
             </Select>
           </div>
