@@ -14,12 +14,12 @@ const idDataMap: Record<string, number> = {
 };
 
 const DEFAULT_PERMISSIONS: Record<string, { [key: string]: boolean }> = {
-  Usuario: { dashboard: true, eventos: true, planes: true, resultados: true, perfil: true },
-  Calidad: { dashboard: true, eventos: true, planes: true, aprobaciones: true, resultados: true, departamentos: true, tiempos: true, perfil: true },
-  Administrador: { dashboard: true, eventos: true, planes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true, perfil: true },
+  Usuario: { dashboard: true, eventos: true, planes: true, reportes: true, resultados: true, perfil: true },
+  Calidad: { dashboard: true, eventos: true, planes: true, reportes: true, aprobaciones: true, resultados: true, departamentos: true, tiempos: true, perfil: true },
+  Administrador: { dashboard: true, eventos: true, planes: true, reportes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true, perfil: true },
   // Fallbacks para compatibilidad
-  'Normal': { dashboard: true, eventos: true, planes: true, resultados: true, perfil: true },
-  'Admin': { dashboard: true, eventos: true, planes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true, perfil: true }
+  'Normal': { dashboard: true, eventos: true, planes: true, reportes: true, resultados: true, perfil: true },
+  'Admin': { dashboard: true, eventos: true, planes: true, reportes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true, perfil: true }
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {

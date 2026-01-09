@@ -7,6 +7,7 @@ import { Eventos } from './pages/Eventos/Eventos';
 import { PlanesAccion } from './pages/PlanesAccion/PlanesAccion';
 import { Aprobaciones } from './pages/Aprobaciones/Aprobaciones';
 import { Resultados } from './pages/Resultados/Resultados';
+import { Reportes } from './pages/Reportes/Reportes';
 import { Departamentos } from './pages/Configuracion/Departamentos';
 import { Usuarios } from './pages/Configuracion/Usuarios';
 import { Roles } from './pages/Configuracion/Roles';
@@ -76,6 +77,14 @@ function AppRoutes() {
         <ProtectedRoute moduleId="resultados">
           <AppLayout>
             <Resultados />
+          </AppLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/reportes" element={
+        <ProtectedRoute moduleId="reportes">
+          <AppLayout>
+            <Reportes />
           </AppLayout>
         </ProtectedRoute>
       } />

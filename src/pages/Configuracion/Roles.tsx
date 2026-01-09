@@ -19,6 +19,7 @@ const MODULES = [
   { id: 'eventos', name: 'Eventos' },
   { id: 'planes', name: 'Planes de Acción' },
   { id: 'aprobaciones', name: 'Aprobaciones' },
+  { id: 'reportes', name: 'Reportes' },
   { id: 'resultados', name: 'Resultados' },
   { id: 'usuarios', name: 'Config - Usuarios' },
   { id: 'departamentos', name: 'Config - Departamentos' },
@@ -43,9 +44,9 @@ export const Roles = () => {
       } else {
         // Inicializar por defecto si no existe
         const defaults: Permissions = {
-          Usuario: { dashboard: true, eventos: true, planes: true, resultados: true },
-          Calidad: { dashboard: true, eventos: true, planes: true, aprobaciones: true, resultados: true, departamentos: true, tiempos: true },
-          Administrador: { dashboard: true, eventos: true, planes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true }
+          Usuario: { dashboard: true, eventos: true, planes: true, reportes: true, resultados: true },
+          Calidad: { dashboard: true, eventos: true, planes: true, reportes: true, aprobaciones: true, resultados: true, departamentos: true, tiempos: true },
+          Administrador: { dashboard: true, eventos: true, planes: true, reportes: true, aprobaciones: true, resultados: true, usuarios: true, departamentos: true, roles: true, tiempos: true }
         };
         setPermissions(defaults);
       }

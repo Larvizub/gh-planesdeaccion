@@ -9,6 +9,7 @@ import {
   LayoutDashboard, 
   Settings, 
   FileText, 
+  ClipboardList,
   Users, 
   ShieldCheck,
   Building2, 
@@ -142,6 +143,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
     { id: 'eventos', label: 'Eventos', href: '/eventos', icon: Calendar },
     { id: 'planes', label: 'Planes de Acción', href: '/planes-accion', icon: FileText },
     { id: 'aprobaciones', label: 'Aprobaciones', href: '/aprobaciones', icon: CheckCircle2 },
+    { id: 'reportes', label: 'Reportes', href: '/reportes', icon: ClipboardList },
     { id: 'resultados', label: 'Resultados', href: '/resultados', icon: BarChart3 },
     { 
       id: 'configuracion',

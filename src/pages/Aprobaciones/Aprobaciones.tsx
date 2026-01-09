@@ -34,6 +34,7 @@ interface PlanAccion {
   causas?: string;
   planAccionDetalle: string;
   comentarioCierre?: string;
+  fotosCierre?: string[];
   rejectReason?: string;
   createdAt: string;
 }
@@ -50,6 +51,8 @@ export const Aprobaciones = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!db || !recinto) return;
+    
     // Only fetch planes that are closed (awaiting approval) or in revision
     const planesRef = ref(db, `planes-accion/${recinto}`);
     const unsubscribe = onValue(planesRef, (snapshot: DataSnapshot) => {
@@ -59,9 +62,11 @@ export const Aprobaciones = () => {
           .map(([id, val]) => ({ id, ...(val as object) }))
           .filter((p) => {
             const plan = p as PlanAccion;
-            return plan.status === 'Cerrado' || plan.status === 'Revision';
+            // Show everything that is not yet fully approved or rejected? 
+            // User: "indiferentemente de que el estado sea abierto o cerrado debería aparecer pendiente de aprobación para el departamento de calidad"
+            return plan.status === 'Abierto' || plan.status === 'Cerrado' || plan.status === 'Revision' || plan.status === 'En Proceso';
           }) as PlanAccion[];
-        setPlanes(list);
+        setPlanes(list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       } else {
         setPlanes([]);
       }
@@ -69,7 +74,7 @@ export const Aprobaciones = () => {
     });
 
     return () => unsubscribe();
-  }, [recinto]);
+  }, [recinto, db]);
 
   const handleApprove = async () => {
     if (!selectedPlan) return;
@@ -186,6 +191,22 @@ export const Aprobaciones = () => {
                    <Label className="text-muted-foreground">Comentario de Cierre</Label>
                    <p className="bg-primary/10 p-2 border border-primary/20 rounded-md">{selectedPlan?.comentarioCierre}</p>
                 </div>
+                {selectedPlan?.fotosCierre && selectedPlan.fotosCierre.length > 0 && (
+                  <div className="col-span-2">
+                    <Label className="text-muted-foreground">Evidencia Fotográfica</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedPlan.fotosCierre.map((url, index) => (
+                        <a key={index} href={url} target="_blank" rel="noopener noreferrer">
+                          <img 
+                            src={url} 
+                            alt={`Evidencia ${index + 1}`} 
+                            className="h-20 w-20 object-cover rounded-md border hover:opacity-80 transition-opacity"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
           <DialogFooter className="flex gap-2">
