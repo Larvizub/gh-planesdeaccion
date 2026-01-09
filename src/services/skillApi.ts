@@ -18,7 +18,7 @@ export const getAuthToken = async () => {
       companyId: ""
     };
     
-    console.log('Autenticando...');
+    console.log('Autenticando en:', BASE_URL + '/authenticate');
     
     const response = await skillApi.post('/authenticate', authData);
     console.log('Respuesta Auth:', response.data);
