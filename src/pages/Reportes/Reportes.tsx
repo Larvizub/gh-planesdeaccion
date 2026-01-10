@@ -22,7 +22,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, Search, Download } from 'lucide-react';
+import { Eye, Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
 import * as XLSX from 'xlsx';
 
@@ -53,6 +53,10 @@ export const Reportes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (!db || !recinto) return;
@@ -105,6 +109,18 @@ export const Reportes = () => {
 
     return result;
   }, [searchTerm, statusFilter, deptFilter, planes]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, deptFilter]);
+
+  const totalPages = Math.ceil(filteredPlanes.length / itemsPerPage);
+  
+  const paginatedPlanes = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredPlanes.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredPlanes, currentPage]);
 
   const getBadgeVariant = (status: string) => {
     switch (status) {
@@ -240,12 +256,12 @@ export const Reportes = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPlanes.length === 0 ? (
+                {paginatedPlanes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-10">No se encontraron registros con los filtros aplicados.</TableCell>
                   </TableRow>
                 ) : (
-                  filteredPlanes.map((plan) => (
+                  paginatedPlanes.map((plan) => (
                     <TableRow key={plan.id}>
                       <TableCell className="font-medium">{plan.eventoName}</TableCell>
                       <TableCell>{plan.departamentoName}</TableCell>
@@ -266,6 +282,35 @@ export const Reportes = () => {
                 )}
               </TableBody>
             </Table>
+          )}
+
+          {!loading && filteredPlanes.length > 0 && (
+            <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="text-sm text-muted-foreground">
+                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredPlanes.length)} de {filteredPlanes.length} registros
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+                </Button>
+                <div className="text-sm font-medium">
+                  Página {currentPage} de {totalPages}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
