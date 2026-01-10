@@ -339,14 +339,14 @@ export const Eventos = () => {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="max-w-md w-[95vw] max-h-[90vh] p-0 flex flex-col overflow-hidden">
+          <DialogHeader className="p-6 pb-2 border-b">
             <DialogTitle>Generar Plan de Acción</DialogTitle>
             <DialogDescription>
               Evento: {selectedEvento?.title}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="departamento">Departamento</Label>
               <Select onValueChange={setIdDepartamento} value={idDepartamento}>
@@ -367,10 +367,11 @@ export const Eventos = () => {
                 placeholder="Describa el comentario del cliente..." 
                 value={comentario}
                 onChange={(e) => setComentario(e.target.value)}
+                className="min-h-[120px]"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="p-6 pt-2 border-t mt-auto">
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
             <Button onClick={handleCreatePlan} disabled={creatingPlan}>
               {creatingPlan ? "Creando..." : "Crear Plan"}

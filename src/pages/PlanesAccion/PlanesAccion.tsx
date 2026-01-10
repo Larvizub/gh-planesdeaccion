@@ -297,162 +297,164 @@ export const PlanesAccion = () => {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[96vh] p-0 flex flex-col overflow-hidden">
+          <DialogHeader className="p-6 pb-2 border-b">
             <DialogTitle>{selectedPlan && isReadOnly(selectedPlan) ? 'Consultar Plan de Acción' : 'Gestionar Plan de Acción'}</DialogTitle>
             <DialogDescription>
               Evento: {selectedPlan?.eventoName} | Comentario: {selectedPlan?.comentario}
             </DialogDescription>
           </DialogHeader>
 
-          {selectedPlan && isTimeLocked(selectedPlan) && (
-            <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-500/50 p-4 rounded-lg flex gap-3 items-center">
-              <Lock className="h-6 w-6 text-amber-600 dark:text-amber-400 shrink-0" />
-              <div>
-                <p className="text-sm font-bold text-amber-800 dark:text-amber-200">TIEMPO AGOTADO</p>
-                <p className="text-xs text-amber-700 dark:text-amber-300">El periodo de registro ha finalizado. Contacte a Calidad para solicitar un desbloqueo.</p>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            {selectedPlan?.status === 'Rechazado' && (
-              <div className="md:col-span-2 bg-destructive/10 p-3 rounded-md border border-destructive/20">
-                <p className="text-sm font-semibold text-destructive mb-1">Motivo del Rechazo:</p>
-                <p className="text-sm italic">{selectedPlan.rejectReason}</p>
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {selectedPlan && isTimeLocked(selectedPlan) && (
+              <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-500/50 p-4 rounded-lg flex gap-3 items-center">
+                <Lock className="h-6 w-6 text-amber-600 dark:text-amber-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-amber-800 dark:text-amber-200">TIEMPO AGOTADO</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">El periodo de registro ha finalizado. Contacte a Calidad para solicitar un desbloqueo.</p>
+                </div>
               </div>
             )}
-            
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="status">Estado del Plan</Label>
-              <Select onValueChange={setStatus} value={status} disabled={selectedPlan ? isReadOnly(selectedPlan) : false}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Abierto">Abierto</SelectItem>
-                  <SelectItem value="En Proceso">En Proceso</SelectItem>
-                  <SelectItem value="Cerrado">Finalizado / Cerrado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="causas">Causas</Label>
-              <Textarea 
-                id="causas" 
-                placeholder="Describa las causas que originaron el comentario..." 
-                className="min-h-[80px]"
-                value={causas}
-                onChange={(e) => setCausas(e.target.value)}
-                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-              />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="detalle">Detalle del Plan de Acción</Label>
-              <Textarea 
-                id="detalle" 
-                placeholder="Describa las acciones a tomar..." 
-                className="min-h-[100px]"
-                value={planDetalle}
-                onChange={(e) => setPlanDetalle(e.target.value)}
-                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {selectedPlan?.status === 'Rechazado' && (
+                <div className="md:col-span-2 bg-destructive/10 p-3 rounded-md border border-destructive/20">
+                  <p className="text-sm font-semibold text-destructive mb-1">Motivo del Rechazo:</p>
+                  <p className="text-sm italic">{selectedPlan.rejectReason}</p>
+                </div>
+              )}
+              
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="status">Estado del Plan</Label>
+                <Select onValueChange={setStatus} value={status} disabled={selectedPlan ? isReadOnly(selectedPlan) : false}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Abierto">Abierto</SelectItem>
+                    <SelectItem value="En Proceso">En Proceso</SelectItem>
+                    <SelectItem value="Cerrado">Finalizado / Cerrado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nc">Consecutivo No Conformidad (Opcional)</Label>
-              <Input 
-                id="nc" 
-                placeholder="Ej: H-CR-2026-0001" 
-                value={consecutivoNC}
-                onChange={(e) => setConsecutivoNC(e.target.value)}
-                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-              />
-            </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="causas">Causas</Label>
+                <Textarea 
+                  id="causas" 
+                  placeholder="Describa las causas que originaron el comentario..." 
+                  className="min-h-[80px]"
+                  value={causas}
+                  onChange={(e) => setCausas(e.target.value)}
+                  disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="detalle">Detalle del Plan de Acción</Label>
+                <Textarea 
+                  id="detalle" 
+                  placeholder="Describa las acciones a tomar..." 
+                  className="min-h-[100px]"
+                  value={planDetalle}
+                  onChange={(e) => setPlanDetalle(e.target.value)}
+                  disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+                />
+              </div>
 
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="cierre">Comentario de Cierre (Evidencias de acciones realizadas)</Label>
-              <Textarea 
-                id="cierre" 
-                placeholder="Resuma las acciones realizadas para cerrar este plan..." 
-                value={comentarioCierre}
-                onChange={(e) => setComentarioCierre(e.target.value)}
-                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="nc">Consecutivo No Conformidad (Opcional)</Label>
+                <Input 
+                  id="nc" 
+                  placeholder="Ej: H-CR-2026-0001" 
+                  value={consecutivoNC}
+                  onChange={(e) => setConsecutivoNC(e.target.value)}
+                  disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+                />
+              </div>
 
-            <div className="md:col-span-2 space-y-4">
-              <Label>Evidencias Fotográficas</Label>
-                    <Label>Pruebas Fotográficas {status === 'Cerrado' ? "(Obligatorio)" : ""}</Label>
-                    
-                    {/* Previsualización de imágenes */}
-                    <div className="flex flex-wrap gap-2">
-                      {fotosCierre.map((url, index) => (
-                        <div key={index} className="relative group">
-                          <img 
-                            src={url} 
-                            alt={`Evidencia ${index + 1}`} 
-                            className="h-20 w-20 object-cover rounded-md border"
-                          />
-                          {selectedPlan && !isReadOnly(selectedPlan) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFoto(index)}
-                              className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      {uploading && (
-                        <div className="h-20 w-20 flex items-center justify-center border rounded-md border-dashed">
-                          <Loading message="" />
-                        </div>
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="cierre">Comentario de Cierre (Evidencias de acciones realizadas)</Label>
+                <Textarea 
+                  id="cierre" 
+                  placeholder="Resuma las acciones realizadas para cerrar este plan..." 
+                  value={comentarioCierre}
+                  onChange={(e) => setComentarioCierre(e.target.value)}
+                  disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-4">
+                <Label>Pruebas Fotográficas {status === 'Cerrado' ? "(Obligatorio)" : ""}</Label>
+                
+                {/* Previsualización de imágenes */}
+                <div className="flex flex-wrap gap-2">
+                  {fotosCierre.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={url} 
+                        alt={`Evidencia ${index + 1}`} 
+                        className="h-20 w-20 object-cover rounded-md border"
+                      />
+                      {selectedPlan && !isReadOnly(selectedPlan) && (
+                        <button
+                          type="button"
+                          onClick={() => removeFoto(index)}
+                          className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
+                  ))}
+                  {uploading && (
+                    <div className="h-20 w-20 flex items-center justify-center border rounded-md border-dashed">
+                      <Loading message="" />
+                    </div>
+                  )}
+                </div>
 
-                    {selectedPlan && !isReadOnly(selectedPlan) && (
-                      <div className="flex gap-2">
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          capture="environment" 
-                          hidden 
-                          ref={cameraInputRef}
-                          onChange={(e) => handleFileUpload(e, true)}
-                        />
-                        <input 
-                          type="file" 
-                          accept="image/*, application/pdf" 
-                          hidden 
-                          ref={fileInputRef}
-                          onChange={(e) => handleFileUpload(e)}
-                        />
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          className="flex-1 flex gap-2" 
-                          onClick={() => cameraInputRef.current?.click()}
-                          disabled={uploading}
-                        >
-                          <Camera className="h-4 w-4" /> Tomar Foto
-                        </Button>
-                        <Button 
-                          type="button"
-                          variant="outline" 
-                          className="flex-1 flex gap-2" 
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploading}
-                        >
-                          <FileUp className="h-4 w-4" /> Subir Archivo
-                        </Button>
-                      </div>
-                    )}
+                {selectedPlan && !isReadOnly(selectedPlan) && (
+                  <div className="flex gap-2">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      capture="environment" 
+                      hidden 
+                      ref={cameraInputRef}
+                      onChange={(e) => handleFileUpload(e, true)}
+                    />
+                    <input 
+                      type="file" 
+                      accept="image/*, application/pdf" 
+                      hidden 
+                      ref={fileInputRef}
+                      onChange={(e) => handleFileUpload(e)}
+                    />
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      className="flex-1 flex gap-2" 
+                      onClick={() => cameraInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <Camera className="h-4 w-4" /> Tomar Foto
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      className="flex-1 flex gap-2" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <FileUp className="h-4 w-4" /> Subir Archivo
+                    </Button>
                   </div>
+                )}
+              </div>
+            </div>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="p-6 pt-2 border-t mt-auto">
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               {selectedPlan && isReadOnly(selectedPlan) ? 'Cerrar' : 'Cancelar'}
             </Button>

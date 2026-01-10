@@ -163,11 +163,11 @@ export const Aprobaciones = () => {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[96vh] p-0 flex flex-col overflow-hidden">
+          <DialogHeader className="p-6 pb-2 border-b">
             <DialogTitle>Revisión de Plan de Acción</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                    <Label className="text-muted-foreground">Evento</Label>
@@ -211,7 +211,7 @@ export const Aprobaciones = () => {
                 )}
             </div>
           </div>
-          <DialogFooter className="flex gap-2">
+          <DialogFooter className="p-6 pt-2 border-t mt-auto flex gap-2">
             <Button variant="destructive" onClick={() => setIsRejectDialogOpen(true)} disabled={processing}>
               <XCircle className="h-4 w-4 mr-2" /> Rechazar
             </Button>
