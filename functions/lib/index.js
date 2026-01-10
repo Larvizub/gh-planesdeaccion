@@ -62,7 +62,7 @@ async function getUserEmails(recinto, filter) {
 // 1. Notificación: Calidad genera un plan para un departamento
 exports.onPlanCreated = (0, database_1.onValueCreated)("/planes-accion/{recinto}/{planId}", async (event) => {
     const { recinto } = event.params;
-    const planData = event.data.val();
+    const planData = event.data ? event.data.val() : null;
     if (!planData)
         return;
     const departmentId = planData.departamentoId;
@@ -132,7 +132,7 @@ exports.onDeadlineUpdated = (0, database_1.onValueWritten)("/config/{recinto}/ti
 exports.deadlineReminder = (0, scheduler_1.onSchedule)({
     schedule: "0 8-17 * * 1-5",
     timeZone: "America/Mexico_City",
-}, async (event) => {
+}, async () => {
     const recintos = ["CCCR", "CCCI", "CEVP"];
     const now = luxon_1.DateTime.now().setZone("America/Mexico_City");
     for (const recinto of recintos) {
@@ -188,9 +188,10 @@ exports.skillProxy = functions.https.onRequest((req, res) => {
             res.status(200).json(response.data);
         }
         catch (error) {
-            console.error("Proxy Error:", error.response?.data || error.message);
-            const status = error.response?.status || 500;
-            const errorData = error.response?.data || { errorMessage: error.message };
+            const axiosError = error;
+            console.error("Proxy Error:", axiosError.response?.data || axiosError.message);
+            const status = axiosError.response?.status || 500;
+            const errorData = axiosError.response?.data || { errorMessage: axiosError.message };
             res.status(status).json(errorData);
         }
     });

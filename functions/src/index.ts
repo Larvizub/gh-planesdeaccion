@@ -14,21 +14,36 @@ admin.initializeApp();
 
 const SKILL_BASE_URL = "https://grupoheroicaapi.skillsuite.net/app/wssuite/api";
 
+interface User {
+  email?: string;
+  departmentId?: string;
+  role?: string;
+  [key: string]: unknown;
+}
+
+interface PlanAction {
+  departamentoId: string;
+  departamentoName?: string;
+  eventoName?: string;
+  comentario: string;
+  gestionado: boolean;
+}
+
 // Helper para obtener emails de usuarios filtrados
-async function getUserEmails(recinto: string, filter?: (user: any) => boolean) {
+async function getUserEmails(recinto: string, filter?: (user: User) => boolean) {
   const snapshot = await admin.database().ref(`users/${recinto}`).once("value");
-  const users = snapshot.val();
+  const users = snapshot.val() as Record<string, User> | null;
   if (!users) return [];
   
   return Object.values(users)
-    .filter((u: any) => u.email && (filter ? filter(u) : true))
-    .map((u: any) => u.email);
+    .filter((u: User) => u.email && (filter ? filter(u) : true))
+    .map((u: User) => u.email as string);
 }
 
 // 1. Notificación: Calidad genera un plan para un departamento
 export const onPlanCreated = onValueCreated("/planes-accion/{recinto}/{planId}", async (event) => {
   const { recinto } = event.params;
-  const planData = event.data.val();
+  const planData = event.data ? (event.data.val() as PlanAction) : null;
   
   if (!planData) return;
 
@@ -56,8 +71,8 @@ export const onPlanCreated = onValueCreated("/planes-accion/{recinto}/{planId}",
 // 2. Notificación: Usuario envía plan a aprobación
 export const onPlanSubmitted = onValueWritten("/planes-accion/{recinto}/{planId}", async (event) => {
   const { recinto } = event.params;
-  const beforeData = event.data.before.val();
-  const afterData = event.data.after.val();
+  const beforeData = event.data.before.val() as PlanAction | null;
+  const afterData = event.data.after.val() as PlanAction | null;
 
   if (!afterData) return; // Deletion
 
@@ -112,7 +127,7 @@ export const onDeadlineUpdated = onValueWritten("/config/{recinto}/tiempos/fecha
 export const deadlineReminder = onSchedule({
   schedule: "0 8-17 * * 1-5",
   timeZone: "America/Mexico_City",
-}, async (event) => {
+}, async () => {
   const recintos = ["CCCR", "CCCI", "CEVP"];
   const now = DateTime.now().setZone("America/Mexico_City");
 
@@ -172,10 +187,11 @@ export const skillProxy = functions.https.onRequest((req, res) => {
 
       const response = await axios(config);
       res.status(200).json(response.data);
-    } catch (error: any) {
-      console.error("Proxy Error:", error.response?.data || error.message);
-      const status = error.response?.status || 500;
-      const errorData = error.response?.data || { errorMessage: error.message };
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: unknown, status?: number }, message: string };
+      console.error("Proxy Error:", axiosError.response?.data || axiosError.message);
+      const status = axiosError.response?.status || 500;
+      const errorData = axiosError.response?.data || { errorMessage: axiosError.message };
       res.status(status).json(errorData);
     }
   });
