@@ -110,11 +110,6 @@ export const Reportes = () => {
     return result;
   }, [searchTerm, statusFilter, deptFilter, planes]);
 
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, deptFilter]);
-
   const totalPages = Math.ceil(filteredPlanes.length / itemsPerPage);
   
   const paginatedPlanes = useMemo(() => {
@@ -193,13 +188,22 @@ export const Reportes = () => {
                   placeholder="Ej: Fiesta Senti..."
                   className="pl-8"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Estado</Label>
-              <Select onValueChange={setStatusFilter} value={statusFilter}>
+              <Select 
+                onValueChange={(val) => {
+                  setStatusFilter(val);
+                  setCurrentPage(1);
+                }} 
+                value={statusFilter}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
@@ -214,7 +218,13 @@ export const Reportes = () => {
             </div>
             <div className="space-y-2">
               <Label>Departamento</Label>
-              <Select onValueChange={setDeptFilter} value={deptFilter}>
+              <Select 
+                onValueChange={(val) => {
+                  setDeptFilter(val);
+                  setCurrentPage(1);
+                }} 
+                value={deptFilter}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
@@ -231,6 +241,7 @@ export const Reportes = () => {
                 setSearchTerm('');
                 setStatusFilter('all');
                 setDeptFilter('all');
+                setCurrentPage(1);
               }}>
                 Limpiar Filtros
               </Button>
