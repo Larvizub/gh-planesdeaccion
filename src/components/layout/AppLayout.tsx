@@ -46,9 +46,10 @@ interface SidebarItemProps {
   isActive?: boolean;
   isSubItem?: boolean;
   children?: React.ReactNode;
+  onClick?: () => void;
 }
 
-const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children }: SidebarItemProps) => {
+const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children, onClick }: SidebarItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (children) {
@@ -67,11 +68,12 @@ const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children }:
           </div>
           {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         </button>
-        {isOpen && (
-          <div className="mt-1 ml-4 flex flex-col gap-1 border-l pl-3">
-            {children}
-          </div>
-        )}
+        <div className={cn(
+          "mt-1 ml-4 flex flex-col gap-1 border-l pl-3 transition-all duration-200 ease-in-out overflow-hidden",
+          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        )}>
+          {children}
+        </div>
       </div>
     );
   }
@@ -79,6 +81,7 @@ const SidebarItem = ({ icon: Icon, label, href, isActive, isSubItem, children }:
   return (
     <Link
       to={href}
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
         isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
@@ -261,52 +264,72 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-background md:hidden">
-             <div className="flex flex-col h-full">
-                <div className="p-4 flex items-center justify-between border-b">
-                  <img 
-                    src="https://costaricacc.com/cccr/Logoheroica.png" 
-                    alt="Logo" 
-                    className="h-10 w-auto object-contain dark:brightness-0 dark:invert" 
-                  />
-                  <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}><X /></Button>
-                </div>
-                <nav className="flex-1 p-4 space-y-1">
-                  {filteredMenuItems.map((item) => (
-                    <SidebarItem
-                      key={item.href}
-                      icon={item.icon}
-                      label={item.label}
-                      href={item.href}
-                      isActive={location.pathname === item.href}
-                    >
-                      {item.subItems?.map((sub) => (
-                        <SidebarItem
-                          key={sub.href}
-                          icon={sub.icon}
-                          label={sub.label}
-                          href={sub.href}
-                          isActive={location.pathname === sub.href}
-                          isSubItem
-                        />
-                      ))}
-                    </SidebarItem>
-                  ))}
-                  <Separator className="my-2" />
+        <div 
+          className={cn(
+            "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden transition-opacity duration-300",
+            isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+        <div 
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-full max-w-[280px] bg-card md:hidden transition-transform duration-300 ease-in-out border-r shadow-xl",
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+           <div className="flex flex-col h-full">
+              <div className="p-4 flex items-center justify-between border-b">
+                <img 
+                  src="https://costaricacc.com/cccr/Logoheroica.png" 
+                  alt="Logo" 
+                  className="h-10 w-auto object-contain dark:brightness-0 dark:invert" 
+                />
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}><X /></Button>
+              </div>
+              <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {filteredMenuItems.map((item) => (
                   <SidebarItem
-                    icon={UserCircle}
-                    label="Mi Perfil"
-                    href="/configuracion/perfil"
-                    isActive={location.pathname === '/configuracion/perfil'}
-                  />
-                </nav>
-                <div className="p-4">
-                  <Button variant="outline" className="w-full text-destructive" onClick={handleLogout}>Cerrar Sesión</Button>
-                </div>
-             </div>
-          </div>
-        )}
+                    key={item.href}
+                    icon={item.icon}
+                    label={item.label}
+                    href={item.href}
+                    isActive={location.pathname === item.href || (item.subItems && location.pathname.startsWith(item.href))}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.subItems?.map((sub) => (
+                      <SidebarItem
+                        key={sub.href}
+                        icon={sub.icon}
+                        label={sub.label}
+                        href={sub.href}
+                        isActive={location.pathname === sub.href}
+                        isSubItem
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      />
+                    ))}
+                  </SidebarItem>
+                ))}
+                <Separator className="my-2" />
+                <SidebarItem
+                  icon={UserCircle}
+                  label="Mi Perfil"
+                  href="/configuracion/perfil"
+                  isActive={location.pathname === '/configuracion/perfil'}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+              </nav>
+              <div className="p-4 border-t space-y-2">
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-3" onClick={toggleDarkMode}>
+                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  <span>{isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full text-destructive" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Cerrar Sesión
+                </Button>
+              </div>
+           </div>
+        </div>
 
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {children}
