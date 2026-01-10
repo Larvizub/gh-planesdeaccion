@@ -28,7 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, FileUp, X, Lock} from 'lucide-react';
+import { Camera, FileUp, X, Lock } from 'lucide-react';
 import { Loading } from '@/components/ui/loading';
 
 interface PlanAccion {
@@ -44,6 +44,7 @@ interface PlanAccion {
   comentarioCierre?: string;
   rejectReason?: string;
   fotosCierre?: string[];
+  gestionado?: boolean;
   createdAt: string;
 }
 
@@ -125,12 +126,14 @@ export const PlanesAccion = () => {
     setUpdating(true);
     try {
       const planRef = ref(db, `planes-accion/${recinto}/${selectedPlan.id}`);
-      const updates: Record<string, string | string[] | undefined> = {
+      
+      const updates: Record<string, string | string[] | boolean | undefined> = {
         status,
         causas,
         planAccionDetalle: planDetalle,
         consecutivoNC,
         fotosCierre,
+        gestionado: true, // Marcamos como gestionado para que aparezca en Aprobaciones
         updatedAt: new Date().toISOString(),
       };
 
@@ -142,15 +145,15 @@ export const PlanesAccion = () => {
       await update(planRef, updates);
       
       toast({
-        title: "Actualizado",
-        description: "El plan de acción ha sido actualizado.",
+        title: "Enviado",
+        description: "El plan de acción ha sido enviado para aprobación.",
       });
       setIsDialogOpen(false);
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: "No se pudo actualizar el plan de acción.",
+        description: "No se pudo enviar el plan de acción.",
         variant: "destructive"
       });
     } finally {
@@ -191,7 +194,9 @@ export const PlanesAccion = () => {
     setFotosCierre(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getBadgeVariant = (status: string) => {
+  const getBadgeVariant = (status: string, gestionado?: boolean) => {
+    if (gestionado && status !== 'Aprobado' && status !== 'Rechazado') return 'secondary';
+    
     switch (status) {
       case 'Abierto': return 'destructive';
       case 'En Proceso': return 'secondary';
@@ -203,12 +208,15 @@ export const PlanesAccion = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, gestionado?: boolean) => {
+    if (status === 'Aprobado') return 'Aprobado';
+    if (status === 'Rechazado') return 'Rechazado (Corregir)';
+    if (gestionado) return 'Enviado a Calidad';
+    
     switch (status) {
-      case 'Abierto': return 'Pendiente de aprobación';
-      case 'En Proceso': return 'Pendiente de aprobación';
-      case 'Cerrado': return 'Pendiente de aprobación';
-      case 'Revision': return 'En revisión';
+      case 'Abierto': return 'Abierto';
+      case 'En Proceso': return 'En Proceso';
+      case 'Cerrado': return 'Finalizado';
       default: return status;
     }
   };
@@ -216,16 +224,16 @@ export const PlanesAccion = () => {
   const isReadOnly = (plan: PlanAccion) => {
     if (!userData) return true;
     
-    // Si ya está en estos estados, es solo lectura para el usuario normal
-    const statusReadOnly = ['Cerrado', 'Revision', 'Aprobado'].includes(plan.status);
+    // Si ya está aprobado, nadie lo edita
+    if (plan.status === 'Aprobado') return true;
     
     if (userData.role === 'Usuario') {
-      // Verificar si el tiempo expiró y si el departamento NO está desbloqueado
+      // Es lectura si ya fue enviado (gestionado) O si el tiempo expiró (y no está desbloqueado)
+      const isEnviado = plan.gestionado === true;
       const timeExpired = fechaLimite ? isAfter(new Date(), new Date(fechaLimite)) : false;
       const isUnlocked = desbloqueados[plan.departamentoId] === true;
 
-      // Es lectura si el tiempo expiró (y no está desbloqueado) O si el status ya no permite edición
-      return (timeExpired && !isUnlocked) || statusReadOnly;
+      return isEnviado || (timeExpired && !isUnlocked);
     }
     
     return false;
@@ -269,8 +277,8 @@ export const PlanesAccion = () => {
                       <TableCell className="font-medium">{plan.eventoName}</TableCell>
                       <TableCell>{plan.departamentoName}</TableCell>
                       <TableCell>
-                        <Badge variant={getBadgeVariant(plan.status)}>
-                          {getStatusLabel(plan.status)}
+                        <Badge variant={getBadgeVariant(plan.status, plan.gestionado)}>
+                          {getStatusLabel(plan.status, plan.gestionado)}
                         </Badge>
                       </TableCell>
                       <TableCell>{new Date(plan.createdAt).toLocaleDateString()}</TableCell>
@@ -314,28 +322,21 @@ export const PlanesAccion = () => {
                 <p className="text-sm italic">{selectedPlan.rejectReason}</p>
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="status">Estado</Label>
+            
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="status">Estado del Plan</Label>
               <Select onValueChange={setStatus} value={status} disabled={selectedPlan ? isReadOnly(selectedPlan) : false}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un estado" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Abierto">Abierto</SelectItem>
-                  <SelectItem value="Cerrado">Cerrado</SelectItem>
+                  <SelectItem value="En Proceso">En Proceso</SelectItem>
+                  <SelectItem value="Cerrado">Finalizado / Cerrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="nc">Consecutivo No Conformidad (Opcional)</Label>
-              <Input 
-                id="nc" 
-                placeholder="Ej: H-CR-2026-0001" 
-                value={consecutivoNC}
-                onChange={(e) => setConsecutivoNC(e.target.value)}
-                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-              />
-            </div>
+
             <div className="md:col-span-2 space-y-2">
               <Label htmlFor="causas">Causas</Label>
               <Textarea 
@@ -358,20 +359,31 @@ export const PlanesAccion = () => {
                 disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
               />
             </div>
-            {(status === 'Cerrado' || (selectedPlan && isReadOnly(selectedPlan))) && (
-              <>
-                <div className="md:col-span-2 space-y-2">
-                  <Label htmlFor="cierre">Comentario de Cierre</Label>
-                  <Textarea 
-                    id="cierre" 
-                    placeholder="Evidencia de las acciones realizadas..." 
-                    value={comentarioCierre}
-                    onChange={(e) => setComentarioCierre(e.target.value)}
-                    disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
-                  />
-                </div>
-                {(status === 'Cerrado' || (selectedPlan && isReadOnly(selectedPlan)) || fotosCierre.length > 0) && (
-                  <div className="md:col-span-2 space-y-4">
+
+            <div className="space-y-2">
+              <Label htmlFor="nc">Consecutivo No Conformidad (Opcional)</Label>
+              <Input 
+                id="nc" 
+                placeholder="Ej: H-CR-2026-0001" 
+                value={consecutivoNC}
+                onChange={(e) => setConsecutivoNC(e.target.value)}
+                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+              />
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="cierre">Comentario de Cierre (Evidencias de acciones realizadas)</Label>
+              <Textarea 
+                id="cierre" 
+                placeholder="Resuma las acciones realizadas para cerrar este plan..." 
+                value={comentarioCierre}
+                onChange={(e) => setComentarioCierre(e.target.value)}
+                disabled={selectedPlan ? isReadOnly(selectedPlan) : false}
+              />
+            </div>
+
+            <div className="md:col-span-2 space-y-4">
+              <Label>Evidencias Fotográficas</Label>
                     <Label>Pruebas Fotográficas {status === 'Cerrado' ? "(Obligatorio)" : ""}</Label>
                     
                     {/* Previsualización de imágenes */}
@@ -439,17 +451,14 @@ export const PlanesAccion = () => {
                       </div>
                     )}
                   </div>
-                )}
-              </>
-            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               {selectedPlan && isReadOnly(selectedPlan) ? 'Cerrar' : 'Cancelar'}
             </Button>
             {selectedPlan && !isReadOnly(selectedPlan) && (
-              <Button onClick={handleUpdateStatus} disabled={updating}>
-                {updating ? "Guardando..." : "Guardar Cambios"}
+              <Button onClick={handleUpdateStatus} disabled={updating} className="flex-1 bg-green-600 hover:bg-green-700">
+                {updating ? "Enviando..." : "Enviar a Aprobación"}
               </Button>
             )}
           </DialogFooter>

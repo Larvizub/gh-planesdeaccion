@@ -36,6 +36,7 @@ interface PlanAccion {
   comentarioCierre?: string;
   fotosCierre?: string[];
   rejectReason?: string;
+  gestionado?: boolean;
   createdAt: string;
 }
 
@@ -61,10 +62,10 @@ export const Aprobaciones = () => {
         const list = Object.entries(data)
           .map(([id, val]) => ({ id, ...(val as object) }))
           .filter((p) => {
-            const plan = p as PlanAccion;
-            // Show everything that is not yet fully approved or rejected? 
-            // User: "indiferentemente de que el estado sea abierto o cerrado debería aparecer pendiente de aprobación para el departamento de calidad"
-            return plan.status === 'Abierto' || plan.status === 'Cerrado' || plan.status === 'Revision' || plan.status === 'En Proceso';
+            const plan = p as any;
+            // Solo mostrar si el departamento ya presionó "Enviar a Aprobación"
+            // y aún no ha sido aprobado definitivamente
+            return plan.gestionado === true && plan.status !== 'Aprobado';
           }) as PlanAccion[];
         setPlanes(list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       } else {
@@ -101,6 +102,7 @@ export const Aprobaciones = () => {
       await update(ref(db, `planes-accion/${recinto}/${selectedPlan.id}`), {
         status: 'Rechazado',
         rejectReason,
+        gestionado: false, // Regresa al departamento para que lo vuelva a gestionar
         rejectedAt: new Date().toISOString(),
       });
       toast({ title: "Rechazado", description: "El plan de acción ha sido devuelto al responsable." });
