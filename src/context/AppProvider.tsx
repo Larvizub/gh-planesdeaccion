@@ -9,8 +9,8 @@ import type { UserData } from './AppContext';
 
 const idDataMap: Record<string, number> = {
   'CCCR': 14, // Costa Rica Convention Center
-  // 'CCCI': 15, // Pendiente confirmar ID para CCCI
-  // 'CEVP': 16, // Pendiente confirmar ID para CEVP
+  // 'CCCI': ??, // Pendiente confirmar ID para CCCI
+  // 'CEVP': ??, // Pendiente confirmar ID para CEVP
 };
 
 const DEFAULT_PERMISSIONS: Record<string, { [key: string]: boolean }> = {
