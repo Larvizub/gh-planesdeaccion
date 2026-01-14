@@ -34,7 +34,7 @@ export const Usuarios = () => {
     onValue(deptsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setDepts(Object.entries(data).map(([id, val]: [string, any]) => ({ id, name: val.name })));
+        setDepts(Object.entries(data).map(([id, val]) => ({ id, name: (val as { name: string }).name })));
       }
     });
 

@@ -50,7 +50,7 @@ export const Departamentos = () => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [recinto]);
+  }, [recinto, db]);
 
   const handleSubmit = async () => {
     if (!name) return;

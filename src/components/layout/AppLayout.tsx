@@ -109,7 +109,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       onValue(deptRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, name: val.name }));
+          const list = Object.entries(data).map(([id, val]) => ({ id, name: (val as { name: string }).name }));
           setDepts(list);
           setShowDeptModal(true);
         }

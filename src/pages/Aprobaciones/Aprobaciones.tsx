@@ -60,13 +60,12 @@ export const Aprobaciones = () => {
       const data = snapshot.val();
       if (data) {
         const list = Object.entries(data)
-          .map(([id, val]) => ({ id, ...(val as object) }))
-          .filter((p) => {
-            const plan = p as any;
+          .map(([id, val]) => ({ id, ...(val as object) }) as PlanAccion)
+          .filter((plan) => {
             // Solo mostrar si el departamento ya presionó "Enviar a Aprobación"
             // y aún no ha sido aprobado definitivamente
             return plan.gestionado === true && plan.status !== 'Aprobado';
-          }) as PlanAccion[];
+          });
         setPlanes(list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       } else {
         setPlanes([]);

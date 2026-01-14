@@ -51,7 +51,7 @@ export const Tiempos = () => {
         setPlanesPendientes([]);
       }
     });
-  }, [recinto]);
+  }, [recinto, db]);
 
   const handleSave = async () => {
     if (!fechaLimite) {
